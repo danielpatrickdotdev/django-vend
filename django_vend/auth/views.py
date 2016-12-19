@@ -5,24 +5,38 @@ from django.core.exceptions import ImproperlyConfigured, SuspiciousOperation
 from django.shortcuts import render
 from django.http import HttpResponseRedirect
 from django.urls import reverse
+from django.views.generic.base import RedirectView
 
 import requests
 
 from .models import VendRetailer
 
 
-def login(request):
-    client_id = getattr(settings, "VEND_KEY", None)
-    if not client_id:
-        raise ImproperlyConfigured('django setting VEND_KEY is required')
+class VendLoginView(RedirectView):
 
-    redirect_uri = 'http://127.0.0.1:8000/vend/auth/complete/'
-    state = 'test'
+    permanent = False
+    query_string = False
+    url = ('https://secure.vendhq.com/connect?response_type=code'
+           '&client_id={}'
+           '&redirect_uri={}'
+           '&state={}'
+    )
 
-    url = 'https://secure.vendhq.com/connect?response_type=code&client_id={}&redirect_uri={}&state={}'.format(client_id, redirect_uri, state)
+    def get_redirect_url(self, *args, **kwargs):
+        client_id = getattr(settings, "VEND_KEY", None)
+        if not client_id:
+            raise ImproperlyConfigured('django setting VEND_KEY is required')
 
-    request.session['vend_state'] = state
-    return HttpResponseRedirect(url)
+        redirect_uri = self.request.build_absolute_uri(
+            reverse('vend_auth_complete'))
+        state = self.create_state()
+
+        return self.url.format(client_id, redirect_uri, state)
+
+    def create_state(self):
+        state = 'test'
+        self.request.session['vend_state'] = state
+        return state
 
 def complete(request):
     if request.method == 'GET':
