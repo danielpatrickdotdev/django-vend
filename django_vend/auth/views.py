@@ -39,20 +39,21 @@ class VendLoginView(RedirectView):
         self.request.session['vend_state'] = state
         return state
 
+def get_param_or_error(request, param_name):
+    param = request.GET.get(param_name)
+    if not param:
+        raise SuspiciousOperation('OAuth2 failure')
+    return param
+
 def complete(request):
     if request.method == 'GET':
-        name = request.GET.get('domain_prefix')
-        if not name:
-            raise SuspiciousOperation('OAuth2 failure')
-        code = request.GET.get('code')
-        if not code:
-            raise SuspiciousOperation('OAuth2 failure')
-        user_id = request.GET.get('user_id')
-        if not user_id:
-            raise SuspiciousOperation('OAuth2 failure')
-        returned_state = request.GET.get('state')
+        name = get_param_or_error(request, 'domain_prefix')
+        code = get_param_or_error(request, 'code')
+        user_id = get_param_or_error(request, 'user_id')
+        returned_state = get_param_or_error(request, 'state')
+
         session_state = request.session.get('vend_state')
-        if returned_state is None or returned_state != session_state:
+        if returned_state != session_state:
             raise SuspiciousOperation('OAuth2 failure')
 
         url = 'https://{}.vendhq.com/api/1.0/token'.format(name)
