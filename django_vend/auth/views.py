@@ -80,7 +80,7 @@ def complete(request):
 
         try:
             retailer = VendRetailer.objects.get(name=name)
-        except VendRetailer.ObjectDoesNotExist:
+        except VendRetailer.DoesNotExist:
             retailer = VendRetailer(
                 name=name,
                 access_token=access_token,
