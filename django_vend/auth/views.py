@@ -8,6 +8,7 @@ from django.urls import reverse
 from django.views.generic.base import RedirectView
 
 import requests
+from oauthlib.common import generate_token
 
 from .models import VendRetailer
 
@@ -34,7 +35,7 @@ class VendLoginView(RedirectView):
         return self.url.format(client_id, redirect_uri, state)
 
     def create_state(self):
-        state = 'test'
+        state = generate_token()
         self.request.session['vend_state'] = state
         return state
 
