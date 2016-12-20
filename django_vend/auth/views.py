@@ -55,6 +55,14 @@ class VendAuthComplete(RedirectView, OAuth2Mixin):
     permanent = False
     query_string = False
 
+    def get_setting_or_error(self, setting):
+        try:
+            result = getattr(settings, setting)
+        except AttributeError:
+            raise ImproperlyConfigured(
+                'django setting {} is required'.format(setting))
+        return result
+
     def get_redirect_url(self, *args, **kwargs):
         if self.request.method == 'GET':
             name = self.get_param_or_error('domain_prefix')
@@ -67,12 +75,8 @@ class VendAuthComplete(RedirectView, OAuth2Mixin):
                 raise SuspiciousOperation('OAuth2 failure')
 
             url = self.VEND_TOKEN_URL.format(name)
-            client_id = getattr(settings, "VEND_KEY", None)
-            if not client_id:
-                raise ImproperlyConfigured('django setting VEND_KEY is required')
-            client_secret = getattr(settings, "VEND_SECRET", None)
-            if not client_secret:
-                raise ImproperlyConfigured('django setting VEND_SECRET is required')
+            client_id = self.get_setting_or_error('VEND_KEY')
+            client_secret = self.get_setting_or_error('VEND_SECRET')
             redirect_uri = self.request.build_absolute_uri(
                 reverse('vend_auth_complete'))
 
