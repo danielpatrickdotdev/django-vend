@@ -13,6 +13,15 @@ from oauthlib.common import generate_token
 from .models import VendRetailer
 
 
+class OAuth2Mixin(object):
+
+    def get_param_or_error(self, param_name):
+        param = self.request.GET.get(param_name)
+        if not param:
+            raise SuspiciousOperation('OAuth2 failure')
+        return param
+
+
 class VendLoginView(RedirectView):
 
     permanent = False
@@ -40,20 +49,14 @@ class VendLoginView(RedirectView):
         return state
 
 
-def get_param_or_error(request, param_name):
-    param = request.GET.get(param_name)
-    if not param:
-        raise SuspiciousOperation('OAuth2 failure')
-    return param
-
-class VendAuthComplete(RedirectView):
+class VendAuthComplete(RedirectView, OAuth2Mixin):
 
     def get_redirect_url(self, *args, **kwargs):
         if self.request.method == 'GET':
-            name = get_param_or_error(self.request, 'domain_prefix')
-            code = get_param_or_error(self.request, 'code')
-            user_id = get_param_or_error(self.request, 'user_id')
-            returned_state = get_param_or_error(self.request, 'state')
+            name = self.get_param_or_error('domain_prefix')
+            code = self.get_param_or_error('code')
+            user_id = self.get_param_or_error('user_id')
+            returned_state = self.get_param_or_error('state')
 
             session_state = self.request.session.get('vend_state')
             if returned_state != session_state:
