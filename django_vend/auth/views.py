@@ -26,6 +26,7 @@ class OAuth2Mixin(object):
 
 class VendAuthLogin(RedirectView):
 
+    http_method_names = ['get']
     permanent = False
     query_string = False
     url = ('https://secure.vendhq.com/connect?response_type=code'
@@ -54,6 +55,7 @@ class VendAuthLogin(RedirectView):
 class VendAuthComplete(RedirectView, OAuth2Mixin):
 
     VEND_TOKEN_URL = 'https://{}.vendhq.com/api/1.0/token'
+    http_method_names = ['get']
     permanent = False
     query_string = False
 
@@ -66,56 +68,52 @@ class VendAuthComplete(RedirectView, OAuth2Mixin):
         return result
 
     def get_redirect_url(self, *args, **kwargs):
-        if self.request.method == 'GET':
-            name = self.get_param_or_error('domain_prefix')
-            code = self.get_param_or_error('code')
-            user_id = self.get_param_or_error('user_id')
-            returned_state = self.get_param_or_error('state')
+        name = self.get_param_or_error('domain_prefix')
+        code = self.get_param_or_error('code')
+        user_id = self.get_param_or_error('user_id')
+        returned_state = self.get_param_or_error('state')
 
-            session_state = self.request.session.get('vend_state')
-            if returned_state != session_state:
-                raise SuspiciousOperation('OAuth2 failure')
+        session_state = self.request.session.get('vend_state')
+        if returned_state != session_state:
+            raise SuspiciousOperation('OAuth2 failure')
 
-            url = self.VEND_TOKEN_URL.format(name)
-            client_id = self.get_setting_or_error('VEND_KEY')
-            client_secret = self.get_setting_or_error('VEND_SECRET')
-            redirect_uri = self.request.build_absolute_uri(
-                reverse('vend_auth_complete'))
+        url = self.VEND_TOKEN_URL.format(name)
+        client_id = self.get_setting_or_error('VEND_KEY')
+        client_secret = self.get_setting_or_error('VEND_SECRET')
+        redirect_uri = self.request.build_absolute_uri(
+            reverse('vend_auth_complete'))
 
-            data = {
-                'code': code,
-                'client_id': client_id,
-                'client_secret': client_secret,
-                'grant_type': 'authorization_code',
-                'redirect_uri': redirect_uri,
-            }
-            r = requests.post(url, data=data)
+        data = {
+            'code': code,
+            'client_id': client_id,
+            'client_secret': client_secret,
+            'grant_type': 'authorization_code',
+            'redirect_uri': redirect_uri,
+        }
+        r = requests.post(url, data=data)
 
-            try:
-                data = r.json()
-            except ValueError:
-                raise SuspiciousOperation('OAuth2 failure')
-            access_token = self.get_param_or_error('access_token', data)
-            token_type = self.get_param_or_error('token_type', data)
-            if token_type != 'Bearer':
-                raise SuspiciousOperation('OAuth2 failure')
-            expires = self.get_param_or_error('expires', data)
-            expires_in = self.get_param_or_error('expires_in', data)
-            refresh_token = self.get_param_or_error('refresh_token', data)
+        try:
+            data = r.json()
+        except ValueError:
+            raise SuspiciousOperation('OAuth2 failure')
+        access_token = self.get_param_or_error('access_token', data)
+        token_type = self.get_param_or_error('token_type', data)
+        if token_type != 'Bearer':
+            raise SuspiciousOperation('OAuth2 failure')
+        expires = self.get_param_or_error('expires', data)
+        expires_in = self.get_param_or_error('expires_in', data)
+        refresh_token = self.get_param_or_error('refresh_token', data)
 
-            retailer, created = VendRetailer.objects.update_or_create(
-                name=name,
-                defaults={
-                    'access_token': access_token,
-                    'expires': datetime.fromtimestamp(expires),
-                    'expires_in': expires_in,
-                    'refresh_token': refresh_token,
-                },
-            )
-            self.request.session['retailer_id'] = retailer.id
-
-        else:
-            raise SuspiciousOperation('{} request not allowed'.format(self.request.method))
+        retailer, created = VendRetailer.objects.update_or_create(
+            name=name,
+            defaults={
+                'access_token': access_token,
+                'expires': datetime.fromtimestamp(expires),
+                'expires_in': expires_in,
+                'refresh_token': refresh_token,
+            },
+        )
+        self.request.session['retailer_id'] = retailer.id
 
         return self.request.build_absolute_uri(
             reverse('vend_auth_select_user'))
