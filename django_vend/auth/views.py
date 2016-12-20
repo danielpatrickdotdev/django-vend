@@ -72,7 +72,8 @@ class VendAuthComplete(RedirectView, OAuth2Mixin):
             client_secret = getattr(settings, "VEND_SECRET", None)
             if not client_secret:
                 raise ImproperlyConfigured('django setting VEND_SECRET is required')
-            redirect_uri = 'http://127.0.0.1:8000/vend/auth/complete/'
+            redirect_uri = self.request.build_absolute_uri(
+                reverse('vend_auth_complete'))
 
             data = {
                 'code': code,
