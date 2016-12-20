@@ -124,7 +124,8 @@ class VendAuthComplete(RedirectView, OAuth2Mixin):
         else:
             raise SuspiciousOperation('{} request not allowed'.format(self.request.method))
 
-        return 'http://127.0.0.1:8000/vend/auth/select-user/'
+        return self.request.build_absolute_uri(
+            reverse('vend_auth_select_user'))
 
 def select_user(request):
     retailer_id = request.session.get('retailer_id')
