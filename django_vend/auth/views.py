@@ -5,7 +5,7 @@ from django.core.exceptions import ImproperlyConfigured, SuspiciousOperation
 from django.shortcuts import render
 from django.http import HttpResponseRedirect
 from django.urls import reverse
-from django.views.generic.base import RedirectView
+from django.views.generic.base import RedirectView, TemplateView
 
 import requests
 from oauthlib.common import generate_token
@@ -118,26 +118,33 @@ class VendAuthComplete(RedirectView, OAuth2Mixin):
         return self.request.build_absolute_uri(
             reverse('vend_auth_select_user'))
 
-def select_user(request):
-    retailer_id = request.session.get('retailer_id')
-    if retailer_id:
-        retailer = VendRetailer.objects.get(id=retailer_id)
-    else:
-        return HttpResponseRedirect(reverse('vend_auth_login'))
 
-    url = 'https://{}.vendhq.com/api/users'.format(retailer.name)
+class VendAuthSelectUser(TemplateView):
 
-    headers = {
-        'Authorization': 'Bearer {}'.format(retailer.access_token),
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-    }
-    r = requests.get(url, headers=headers)
-    try:
-        users = r.json()['users']
-        for user in users:
-            print(user['id'])
-    except (ValueError, KeyError):
-        users = None
+    http_method_names = ['get']
+    template_name = 'vend_auth/select_user.html'
 
-    return render(request, 'vend_auth/select_user.html', {'users': users})
+    def get_context_data(self, **kwargs):
+        context = super(VendAuthSelectUser, self).get_context_data(**kwargs)
+
+        retailer_id = self.request.session.get('retailer_id')
+        if retailer_id:
+            retailer = VendRetailer.objects.get(id=retailer_id)
+        else:
+            return HttpResponseRedirect(reverse('vend_auth_login'))
+
+        url = 'https://{}.vendhq.com/api/users'.format(retailer.name)
+
+        headers = {
+            'Authorization': 'Bearer {}'.format(retailer.access_token),
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+        }
+        r = requests.get(url, headers=headers)
+        try:
+            users = r.json()['users']
+        except (ValueError, KeyError):
+            users = None
+
+        context['users'] = users
+        return context
