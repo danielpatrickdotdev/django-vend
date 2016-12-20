@@ -103,22 +103,15 @@ class VendAuthComplete(RedirectView, OAuth2Mixin):
             if not refresh_token:
                 raise SuspiciousOperation('OAuth2 failure')
 
-            try:
-                retailer = VendRetailer.objects.get(name=name)
-            except VendRetailer.DoesNotExist:
-                retailer = VendRetailer(
-                    name=name,
-                    access_token=access_token,
-                    expires=datetime.fromtimestamp(expires),
-                    expires_in=expires_in,
-                    refresh_token=refresh_token,
-                )
-            else:
-                retailer.access_token = access_token
-                retailer.expires = datetime.fromtimestamp(expires)
-                retailer.expires_in = expires_in
-                retailer.refresh_token = refresh_token
-            retailer.save()
+            retailer, created = VendRetailer.objects.update_or_create(
+                name=name,
+                defaults={
+                    'access_token': access_token,
+                    'expires': datetime.fromtimestamp(expires),
+                    'expires_in': expires_in,
+                    'refresh_token': refresh_token,
+                },
+            )
             self.request.session['retailer_id'] = retailer.id
 
         else:
