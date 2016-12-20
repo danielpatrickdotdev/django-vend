@@ -24,7 +24,7 @@ class OAuth2Mixin(object):
         return param
 
 
-class VendLoginView(RedirectView):
+class VendAuthLogin(RedirectView):
 
     permanent = False
     query_string = False
