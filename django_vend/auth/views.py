@@ -15,8 +15,10 @@ from .models import VendRetailer
 
 class OAuth2Mixin(object):
 
-    def get_param_or_error(self, param_name):
-        param = self.request.GET.get(param_name)
+    def get_param_or_error(self, param_name, dict_obj=None):
+        if not dict_obj:
+            dict_obj = self.request.GET
+        param = dict_obj.get(param_name)
         if not param:
             raise SuspiciousOperation('OAuth2 failure')
         return param
@@ -93,21 +95,13 @@ class VendAuthComplete(RedirectView, OAuth2Mixin):
                 data = r.json()
             except ValueError:
                 raise SuspiciousOperation('OAuth2 failure')
-            access_token = data.get('access_token')
-            if not access_token:
+            access_token = self.get_param_or_error('access_token', data)
+            token_type = self.get_param_or_error('token_type', data)
+            if token_type != 'Bearer':
                 raise SuspiciousOperation('OAuth2 failure')
-            token_type = data.get('token_type')
-            if not token_type or token_type != 'Bearer':
-                raise SuspiciousOperation('OAuth2 failure')
-            expires = data.get('expires')
-            if not expires:
-                raise SuspiciousOperation('OAuth2 failure')
-            expires_in = data.get('expires_in')
-            if not expires_in:
-                raise SuspiciousOperation('OAuth2 failure')
-            refresh_token  = data.get('refresh_token')
-            if not refresh_token:
-                raise SuspiciousOperation('OAuth2 failure')
+            expires = self.get_param_or_error('expires', data)
+            expires_in = self.get_param_or_error('expires_in', data)
+            refresh_token = self.get_param_or_error('refresh_token', data)
 
             retailer, created = VendRetailer.objects.update_or_create(
                 name=name,
