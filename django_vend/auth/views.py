@@ -51,6 +51,9 @@ class VendLoginView(RedirectView):
 
 class VendAuthComplete(RedirectView, OAuth2Mixin):
 
+    permanent = False
+    query_string = False
+
     def get_redirect_url(self, *args, **kwargs):
         if self.request.method == 'GET':
             name = self.get_param_or_error('domain_prefix')
