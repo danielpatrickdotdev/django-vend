@@ -51,6 +51,7 @@ class VendLoginView(RedirectView):
 
 class VendAuthComplete(RedirectView, OAuth2Mixin):
 
+    VEND_TOKEN_URL = 'https://{}.vendhq.com/api/1.0/token'
     permanent = False
     query_string = False
 
@@ -65,7 +66,7 @@ class VendAuthComplete(RedirectView, OAuth2Mixin):
             if returned_state != session_state:
                 raise SuspiciousOperation('OAuth2 failure')
 
-            url = 'https://{}.vendhq.com/api/1.0/token'.format(name)
+            url = self.VEND_TOKEN_URL.format(name)
             client_id = getattr(settings, "VEND_KEY", None)
             if not client_id:
                 raise ImproperlyConfigured('django setting VEND_KEY is required')
