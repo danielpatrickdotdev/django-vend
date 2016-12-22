@@ -4,6 +4,10 @@ from django.conf import settings
 from dateutil.parser import parse as date_parse
 
 from django_vend.core.managers import BaseVendAPIManager
+from django_vend.core.utils import get_vend_setting
+
+
+DEFAULT_USER_IMAGE = get_vend_setting('VEND_DEFAULT_USER_IMAGE')
 
 class VendUserManager(BaseVendAPIManager):
 
@@ -91,7 +95,7 @@ class VendUser(models.Model):
     name = models.CharField(max_length=256)
     display_name = models.CharField(max_length=256)
     email = models.EmailField()
-    image = models.URLField(blank=True)
+    image = models.URLField(blank=True, default=DEFAULT_USER_IMAGE)
     account_type = models.CharField(
         max_length=1,
         choices=ACCOUNT_TYPE_CHOICES,
