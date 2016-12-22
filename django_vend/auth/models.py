@@ -27,12 +27,14 @@ class VendUserManager(BaseVendAPIManager):
         uid = self.value_or_error(result, 'id', e)
         name = self.value_or_error(result, 'name', e)
         display_name = self.value_or_error(result, 'display_name', e)
+        email = self.value_or_error(result, 'email', e)
         created_at = date_parse(self.value_or_error(result, 'created_at', e))
         updated_at = date_parse(self.value_or_error(result, 'updated_at', e))
         defaults = {
             'retailer': retailer,
             'name': name,
             'display_name': display_name,
+            'email': email,
             'created_at': created_at,
             'updated_at': updated_at,
         }
@@ -88,6 +90,7 @@ class VendUser(models.Model):
     retailer = models.ForeignKey(VendRetailer, editable=False, on_delete=models.CASCADE)
     name = models.CharField(max_length=256)
     display_name = models.CharField(max_length=256)
+    email = models.EmailField()
     image = models.URLField(blank=True)
     account_type = models.CharField(
         max_length=1,
