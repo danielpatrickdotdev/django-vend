@@ -31,17 +31,21 @@ class BaseVendAPIManager(models.Manager):
             data = None
         return data
 
+    def get_inner_json(obj, container_name):
+        if container_name is not None:
+            try:
+                inner = obj[container_name]
+            except KeyError:
+                #TODO: decide what to do here!
+                inner = None
+        return inner
+
     def retrieve_object_from_api(self, retailer, object_id, defaults=None):
         # Call API
         url = self.resource_object_url.format(retailer.name, object_id)
         data = self.retrieve_from_api(retailer, url)
 
-        if self.json_object_name is not None:
-            try:
-                data = data[self.json_object_name]
-            except KeyError:
-                #TODO: decide what to do here!
-                data = None
+        data = get_inner_json(data, self.json_object_name)
 
         return self.parse_object(retailer, data, defaults)
 
@@ -50,12 +54,7 @@ class BaseVendAPIManager(models.Manager):
         url = self.resource_collection_url.format(retailer.name)
         data = self.retrieve_from_api(retailer, url)
 
-        if self.json_collection_name is not None:
-            try:
-                data = data[self.json_collection_name]
-            except KeyError:
-                #TODO: decide what to do here!
-                data = None
+        data = get_inner_json(data, self.json_collection_name)
 
         # Save to DB & Return saved objects
         return self.parse_collection(retailer, data)
