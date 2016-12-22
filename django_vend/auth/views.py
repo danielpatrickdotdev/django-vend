@@ -10,7 +10,7 @@ from django.views.generic.base import RedirectView, TemplateView
 import requests
 from oauthlib.common import generate_token
 
-from .models import VendRetailer
+from .models import VendRetailer, VendUser
 
 
 class OAuth2Mixin(object):
@@ -133,18 +133,6 @@ class VendAuthSelectUser(TemplateView):
         else:
             return HttpResponseRedirect(reverse('vend_auth_login'))
 
-        url = 'https://{}.vendhq.com/api/users'.format(retailer.name)
-
-        headers = {
-            'Authorization': 'Bearer {}'.format(retailer.access_token),
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-        }
-        r = requests.get(url, headers=headers)
-        try:
-            users = r.json()['users']
-        except (ValueError, KeyError):
-            users = None
-
+        users = VendUser.objects.retrieve_collection_from_api(retailer)
         context['users'] = users
         return context
