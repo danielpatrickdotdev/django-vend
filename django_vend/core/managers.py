@@ -23,45 +23,39 @@ class BaseVendAPIManager(models.Manager):
             'Content-Type': 'application/json',
             'Accept': 'application/json',
         }
-        return requests.get(url, headers=headers)
-
-    def retrieve_object_from_api(self, retailer, object_id, defaults=None):
-        # Call API
-        url = self.resource_object_url.format(retailer.name, object_id)
-        result = self.retrieve_from_api(retailer, url)
-
+        result = requests.get(url, headers=headers)
         try:
             data = result.json()
         except ValueError:
             #TODO: decide what to do here!
             data = None
-        else:
-            if self.json_object_name is not None:
-                try:
-                    data = data[self.json_object_name]
-                except KeyError:
-                    #TODO: decide what to do here!
-                    data = None
+        return data
+
+    def retrieve_object_from_api(self, retailer, object_id, defaults=None):
+        # Call API
+        url = self.resource_object_url.format(retailer.name, object_id)
+        data = self.retrieve_from_api(retailer, url)
+
+        if self.json_object_name is not None:
+            try:
+                data = data[self.json_object_name]
+            except KeyError:
+                #TODO: decide what to do here!
+                data = None
 
         return self.parse_object(retailer, data, defaults)
 
     def retrieve_collection_from_api(self, retailer):
         # Call API
         url = self.resource_collection_url.format(retailer.name)
-        result = self.retrieve_from_api(retailer, url)
+        data = self.retrieve_from_api(retailer, url)
 
-        try:
-            data = result.json()
-        except ValueError:
-            #TODO: decide what to do here!
-            data = None
-        else:
-            if self.json_collection_name is not None:
-                try:
-                    data = data[self.json_collection_name]
-                except KeyError:
-                    #TODO: decide what to do here!
-                    data = None
+        if self.json_collection_name is not None:
+            try:
+                data = data[self.json_collection_name]
+            except KeyError:
+                #TODO: decide what to do here!
+                data = None
 
         # Save to DB & Return saved objects
         return self.parse_collection(retailer, data)
