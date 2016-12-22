@@ -1,11 +1,11 @@
 from django.db import models
 from django.conf import settings
+from django.utils import timezone
 
 from dateutil.parser import parse as date_parse
 
 from django_vend.core.managers import BaseVendAPIManager
 from django_vend.core.utils import get_vend_setting
-
 
 DEFAULT_USER_IMAGE = get_vend_setting('VEND_DEFAULT_USER_IMAGE')
 
@@ -39,8 +39,8 @@ class VendUserManager(BaseVendAPIManager):
             'name': name,
             'display_name': display_name,
             'email': email,
-            'created_at': created_at,
-            'updated_at': updated_at,
+            'created_at': timezone.make_aware(created_at, timezone.utc),
+            'updated_at': timezone.make_aware(updated_at, timezone.utc),
         }
         if 'image' in result:
             image = self.value_or_error(result['image'], 'url', e)
