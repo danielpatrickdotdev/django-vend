@@ -25,7 +25,10 @@ class BaseVendAPIManager(models.Manager):
             'Content-Type': 'application/json',
             'Accept': 'application/json',
         }
-        result = requests.get(url, headers=headers)
+        try:
+            result = requests.get(url, headers=headers)
+        except requests.exceptions.RequestException as e:
+            raise VendSyncError(e)
         try:
             data = result.json()
         except ValueError as e:
