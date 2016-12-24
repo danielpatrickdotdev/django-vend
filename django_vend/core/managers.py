@@ -2,6 +2,8 @@ from django.db import models
 
 import requests
 
+from django_vend.core.exceptions import VendSyncError
+
 
 class BaseVendAPIManager(models.Manager):
 
@@ -13,7 +15,7 @@ class BaseVendAPIManager(models.Manager):
     def value_or_error(self, dict_obj, key, e=KeyError):
         value = dict_obj.get(key)
         if not value:
-            raise e
+            raise e('dict_obj does not contain key {}'.format(key))
 
         return value
 
@@ -26,9 +28,8 @@ class BaseVendAPIManager(models.Manager):
         result = requests.get(url, headers=headers)
         try:
             data = result.json()
-        except ValueError:
-            #TODO: decide what to do here!
-            data = None
+        except ValueError as e:
+            raise VendSyncError(e)
         return data
 
     def get_inner_json(self, obj, container_name):
@@ -36,9 +37,8 @@ class BaseVendAPIManager(models.Manager):
         if container_name is not None:
             try:
                 inner = obj[container_name]
-            except KeyError:
-                #TODO: decide what to do here!
-                pass
+            except KeyError as e:
+                raise VendSyncError(e)
         return inner or obj
 
     def retrieve_object_from_api(self, retailer, object_id, defaults=None):
@@ -66,7 +66,7 @@ class BaseVendAPIManager(models.Manager):
 
     def parse_collection(self, retailer, result):
         objects = []
-        e = Exception #TODO: decide appropriate exception class
+        e = VendSyncError
 
         for object_stub in result:
             id = self.value_or_error(object_stub, 'id', e)

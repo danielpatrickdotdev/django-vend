@@ -6,6 +6,7 @@ from dateutil.parser import parse as date_parse
 
 from django_vend.core.managers import BaseVendAPIManager
 from django_vend.core.utils import get_vend_setting
+from django_vend.core.exceptions import VendSyncError
 
 DEFAULT_USER_IMAGE = get_vend_setting('VEND_DEFAULT_USER_IMAGE')
 
@@ -16,18 +17,18 @@ class VendUserManager(BaseVendAPIManager):
 
     json_collection_name = 'users'
 
-    def get_account_type(self, account_type_str, e=Exception):
+    def get_account_type(self, account_type_str, exception=Exception):
         try:
             initial = account_type_str[0].upper()
-        except IndexError:
-            raise e
+        except IndexError as e:
+            raise exception(e)
         choices = [c[0] for c in self.model.ACCOUNT_TYPE_CHOICES]
         if not initial in choices:
-            raise e
+            raise exception(e)
         return initial
 
     def parse_object(self, retailer, result, override_defaults):
-        e = Exception #TODO: Decide appropriate exception
+        e = VendSyncError
         uid = self.value_or_error(result, 'id', e)
         name = self.value_or_error(result, 'name', e)
         display_name = self.value_or_error(result, 'display_name', e)
@@ -54,7 +55,7 @@ class VendUserManager(BaseVendAPIManager):
 
     def parse_collection(self, retailer, result):
         users = []
-        e = Exception #TODO: decide appropriate exception class
+        e = VendSyncError
 
         for user in result:
             id = self.value_or_error(user, 'id', e)
