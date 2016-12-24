@@ -68,6 +68,10 @@ class VendUserManager(BaseVendAPIManager):
 
 
 class VendRetailer(models.Model):
+    users = models.ManyToManyField(
+        settings.AUTH_USER_MODEL,
+        related_name='retailer',
+        through='VendProfile')
     name = models.CharField(unique=True, max_length=256)
     access_token = models.CharField(max_length=256)
     expires = models.DateTimeField()
@@ -76,6 +80,12 @@ class VendRetailer(models.Model):
 
     def __str__(self):
         return self.name
+
+class VendProfile(models.Model):
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE)
+    retailer = models.ForeignKey(VendRetailer, on_delete=models.CASCADE)
 
 class VendUser(models.Model):
     ADMIN = 'A'
@@ -87,10 +97,9 @@ class VendUser(models.Model):
         (CASHIER, 'Cashier'),
     )
 
-    user = models.OneToOneField(
+    users = models.ManyToManyField(
         settings.AUTH_USER_MODEL,
-        null=True,
-        on_delete=models.SET_NULL)
+        related_name='vendusers')
     uid = models.UUIDField(editable=False)
     retailer = models.ForeignKey(VendRetailer, editable=False, on_delete=models.CASCADE)
     name = models.CharField(max_length=256)

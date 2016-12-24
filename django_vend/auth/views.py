@@ -6,11 +6,12 @@ from django.shortcuts import render
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 from django.views.generic.base import RedirectView, TemplateView
+from django.contrib.auth.mixins import LoginRequiredMixin
 
 import requests
 from oauthlib.common import generate_token
 
-from .models import VendRetailer, VendUser
+from .models import VendRetailer, VendUser, VendProfile
 
 
 class OAuth2Mixin(object):
@@ -24,7 +25,7 @@ class OAuth2Mixin(object):
         return param
 
 
-class VendAuthLogin(RedirectView):
+class VendAuthLogin(LoginRequiredMixin, RedirectView):
 
     http_method_names = ['get']
     permanent = False
@@ -52,7 +53,7 @@ class VendAuthLogin(RedirectView):
         return state
 
 
-class VendAuthComplete(RedirectView, OAuth2Mixin):
+class VendAuthComplete(LoginRequiredMixin, RedirectView, OAuth2Mixin):
 
     VEND_TOKEN_URL = 'https://{}.vendhq.com/api/1.0/token'
     http_method_names = ['get']
@@ -112,6 +113,10 @@ class VendAuthComplete(RedirectView, OAuth2Mixin):
                 'expires_in': expires_in,
                 'refresh_token': refresh_token,
             },
+        )
+        VendProfile.objects.update_or_create(
+            user=self.request.user,
+            defaults={'retailer':retailer},
         )
         self.request.session['retailer_id'] = retailer.id
 
