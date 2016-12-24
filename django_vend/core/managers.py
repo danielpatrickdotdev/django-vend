@@ -29,6 +29,9 @@ class BaseVendAPIManager(models.Manager):
             result = requests.get(url, headers=headers)
         except requests.exceptions.RequestException as e:
             raise VendSyncError(e)
+        if result.status_code != requests.codes.ok:
+            raise VendSyncError(
+                'Received {} status from Vend API'.format(result.status_code))
         try:
             data = result.json()
         except ValueError as e:
