@@ -6,6 +6,6 @@ urlpatterns = [
         name='vend_auth_login'),
     url(r'^complete/$', views.VendAuthComplete.as_view(),
         name='vend_auth_complete'),
-    url(r'^select-user/$', views.VendAuthSelectUser.as_view(),
+    url(r'^select-user/$', views.VendAuthSelectUsers.as_view(),
         name='vend_auth_select_user'),
 ]

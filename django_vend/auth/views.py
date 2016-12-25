@@ -124,13 +124,13 @@ class VendAuthComplete(LoginRequiredMixin, RedirectView, OAuth2Mixin):
             reverse('vend_auth_select_user'))
 
 
-class VendAuthSelectUser(TemplateView):
+class VendAuthSelectUsers(TemplateView):
 
     http_method_names = ['get']
     template_name = 'vend_auth/select_user.html'
 
     def get_context_data(self, **kwargs):
-        context = super(VendAuthSelectUser, self).get_context_data(**kwargs)
+        context = super(VendAuthSelectUsers, self).get_context_data(**kwargs)
 
         retailer_id = self.request.session.get('retailer_id')
         if retailer_id:
