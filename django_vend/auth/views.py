@@ -13,7 +13,7 @@ import requests
 from oauthlib.common import generate_token
 
 from .models import VendRetailer, VendUser, VendProfile
-from .forms import VendProfileForm
+from .forms import VendProfileSelectVendUsersForm
 
 
 class OAuth2Mixin(object):
@@ -126,16 +126,16 @@ class VendAuthComplete(LoginRequiredMixin, RedirectView, OAuth2Mixin):
             reverse('vend_auth_select_user'))
 
 
-class VendAuthSelectUsers(LoginRequiredMixin, UpdateView):
+class VendProfileSelectVendUsers(LoginRequiredMixin, UpdateView):
 
-    form_class = VendProfileForm
+    form_class = VendProfileSelectVendUsersForm
     template_name_suffix = '_update_vendusers'
-    success_url = reverse_lazy('vend_auth_select_user')
+    success_url = reverse_lazy('vend_profile_select_vend_users')
 
     def get_object(self):
         return VendProfile.objects.get(user=self.request.user)
 
     def get_form_kwargs(self):
-        kwargs = super(VendAuthSelectUsers, self).get_form_kwargs()
+        kwargs = super(VendProfileSelectVendUsers, self).get_form_kwargs()
         kwargs['retailer_id'] = self.request.user.vendprofile.retailer.pk
         return kwargs
