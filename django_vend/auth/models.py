@@ -86,6 +86,9 @@ class VendProfile(models.Model):
         VendRetailer,
         related_name='vendprofile',
         on_delete=models.CASCADE)
+    vendusers = models.ManyToManyField(
+        'VendUser',
+        related_name='vendprofiles')
 
 class VendUser(models.Model):
     ADMIN = 'A'
@@ -97,9 +100,6 @@ class VendUser(models.Model):
         (CASHIER, 'Cashier'),
     )
 
-    users = models.ManyToManyField(
-        settings.AUTH_USER_MODEL,
-        related_name='vendusers')
     uid = models.UUIDField(editable=False)
     retailer = models.ForeignKey(VendRetailer, editable=False, on_delete=models.CASCADE)
     name = models.CharField(max_length=256)
