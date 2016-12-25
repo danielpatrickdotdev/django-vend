@@ -4,14 +4,16 @@ from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured, SuspiciousOperation
 from django.shortcuts import render
 from django.http import HttpResponseRedirect
-from django.urls import reverse
+from django.urls import reverse, reverse_lazy
 from django.views.generic.base import RedirectView, TemplateView
+from django.views.generic.edit import UpdateView
 from django.contrib.auth.mixins import LoginRequiredMixin
 
 import requests
 from oauthlib.common import generate_token
 
 from .models import VendRetailer, VendUser, VendProfile
+from .forms import VendProfileForm
 
 
 class OAuth2Mixin(object):
@@ -124,20 +126,16 @@ class VendAuthComplete(LoginRequiredMixin, RedirectView, OAuth2Mixin):
             reverse('vend_auth_select_user'))
 
 
-class VendAuthSelectUsers(TemplateView):
+class VendAuthSelectUsers(LoginRequiredMixin, UpdateView):
 
-    http_method_names = ['get']
-    template_name = 'vend_auth/select_user.html'
+    form_class = VendProfileForm
+    template_name_suffix = '_update_vendusers'
+    success_url = reverse_lazy('vend_auth_select_user')
 
-    def get_context_data(self, **kwargs):
-        context = super(VendAuthSelectUsers, self).get_context_data(**kwargs)
+    def get_object(self):
+        return VendProfile.objects.get(user=self.request.user)
 
-        retailer_id = self.request.session.get('retailer_id')
-        if retailer_id:
-            retailer = VendRetailer.objects.get(id=retailer_id)
-        else:
-            return HttpResponseRedirect(reverse('vend_auth_login'))
-
-        users = VendUser.objects.retrieve_collection_from_api(retailer)
-        context['users'] = users
-        return context
+    def get_form_kwargs(self):
+        kwargs = super(VendAuthSelectUsers, self).get_form_kwargs()
+        kwargs['retailer_id'] = self.request.user.vendprofile.retailer.pk
+        return kwargs
