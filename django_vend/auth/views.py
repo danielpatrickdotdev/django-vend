@@ -3,7 +3,7 @@ from datetime import datetime
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured, SuspiciousOperation
 from django.shortcuts import render
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, Http404
 from django.urls import reverse, reverse_lazy
 from django.views.generic.base import RedirectView, TemplateView
 from django.views.generic.edit import UpdateView
@@ -139,3 +139,32 @@ class VendProfileSelectVendUsers(LoginRequiredMixin, UpdateView):
         kwargs = super(VendProfileSelectVendUsers, self).get_form_kwargs()
         kwargs['retailer_id'] = self.request.user.vendprofile.retailer.pk
         return kwargs
+
+
+class VendAuthVendUserListSelect(LoginRequiredMixin, TemplateView):
+
+    model = VendUser
+    template_name = 'vend_auth/venduser_list_select.html'
+    http_method_names = ['get', 'post']
+
+    def get_queryset(self):
+        return self.model.objects.filter(
+            vendprofiles=self.request.user.vendprofile)
+
+    def get_context_data(self, *args, **kwargs):
+        return {'object_list': self.get_queryset()}
+
+    def post(self, request, *args, **kwargs):
+        pk = request.POST.get("venduser_id")
+        if not pk:
+            raise SuspiciousOperation('No VendUser pk supplied in POST')
+
+        try:
+            vu = self.get_queryset().get(pk=pk)
+        except self.model.DoesNotExist:
+            raise Http404(
+                'VendUser id {} not found for logged in User'.format(
+                    self.object.id))
+
+        request.session['venduser_id'] = pk
+        return HttpResponseRedirect(reverse('vend_auth_select_vend_user'))

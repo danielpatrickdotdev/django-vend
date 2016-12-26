@@ -1,0 +1,34 @@
+{% extends "vend_auth/vend_auth_base.html" %}
+{% block title %}Select VendUser{% endblock %}
+{% block head_extra %}
+        <style>
+            .link-button {
+              background: none;
+              border: none;
+              color: blue;
+              text-decoration: underline;
+              cursor: pointer;
+              font-size: 1em;
+              font-family: serif;
+            }
+            .link-button:focus {
+              outline: none;
+            }
+            .link-button:active {
+              color:red;
+            }
+        </style>{% endblock %}
+{% block body %}{% if venduser %}
+        <div>
+            <p>Current user:</p>
+            <img src="{{ venduser.image }}">
+            <p>{{ venduser.display_name }}</p>
+        </div>{% endif %}{% if object_list %}
+        <div>{% for vu in object_list %}
+            <form method="post" action="">{% csrf_token %}
+                <button type="submit" name="venduser_id" value="{{ vu.pk }}" class="link-button">
+                    <img src="{{ vu.image }}"><p>{{ vu.display_name }}</p>
+                </button>
+            </form>{% endfor %}
+        </div>{% endif %}
+{% endblock %}
