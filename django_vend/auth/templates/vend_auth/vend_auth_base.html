@@ -3,5 +3,10 @@
     <head>
         <title>{% block title%}{% endblock %} | Django Vend</title>{% block head_extra %}{% endblock %}
     </head>
-    <body>{% block body %}{% endblock%}    </body>
+    <body>{% if venduser %}
+        <div>
+            <p>Current user:</p>
+            <img src="{{ venduser.image }}">
+            <p>{{ venduser.display_name }}</p>
+        </div>{% endif %}{% block body %}{% endblock%}    </body>
 </html>

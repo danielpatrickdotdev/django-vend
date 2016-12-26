@@ -18,12 +18,7 @@
               color:red;
             }
         </style>{% endblock %}
-{% block body %}{% if venduser %}
-        <div>
-            <p>Current user:</p>
-            <img src="{{ venduser.image }}">
-            <p>{{ venduser.display_name }}</p>
-        </div>{% endif %}{% if object_list %}
+{% block body %}{% if object_list %}
         <div>{% for vu in object_list %}
             <form method="post" action="">{% csrf_token %}
                 <button type="submit" name="venduser_id" value="{{ vu.pk }}" class="link-button">
