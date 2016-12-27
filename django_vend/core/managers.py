@@ -8,9 +8,9 @@ from django_vend.core.exceptions import VendSyncError
 class AbstractVendAPIManager(models.Manager):
     def synchronise(self, retailer, object_id=None):
         if object_id:
-            self._retrieve_object_from_api(retailer, object_id)
+            return self._retrieve_object_from_api(retailer, object_id)
         else:
-            self._retrieve_collection_from_api(retailer)
+            return self._retrieve_collection_from_api(retailer)
 
 class VendAPIManagerMixin(object):
 
@@ -103,15 +103,15 @@ class VendAPICollectionManagerMixin(VendAPIManagerMixin):
         return {}
 
     def parse_collection(self, retailer, result):
-        objects = []
+        created = False
 
         for object_stub in result:
             pk = self.value_or_error(object_stub, 'id')
             defaults = self.parse_json_collection_object(object_stub)
-            objects.append(self._retrieve_object_from_api(
-                retailer, pk, defaults=defaults))
+            created = created or self._retrieve_object_from_api(
+                retailer, pk, defaults=defaults)
 
-        return objects
+        return created
 
 class BaseVendAPIManager(AbstractVendAPIManager,
                          VendAPICollectionManagerMixin,
