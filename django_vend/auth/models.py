@@ -47,6 +47,17 @@ class VendUserManager(BaseVendAPIManager):
 
         return obj
 
+    def parse_collection(self, retailer, result):
+        created = False
+
+        for object_stub in result:
+            pk = self.value_or_error(object_stub, 'id')
+            defaults = self.parse_json_collection_object(object_stub)
+            created = created or self._retrieve_object_from_api(
+                retailer, pk, defaults=defaults)
+
+        return created
+
     def parse_json_collection_object(self, json_obj):
         account_type_str = self.value_or_error(json_obj, 'account_type')
         account_type = self.get_account_type(account_type_str)

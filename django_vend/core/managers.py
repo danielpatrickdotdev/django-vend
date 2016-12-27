@@ -116,10 +116,11 @@ class VendAPICollectionManagerMixin(VendAPIManagerMixin):
         created = False
 
         for object_stub in result:
-            pk = self.value_or_error(object_stub, 'id')
+            uid = self.value_or_error(object_stub, 'id')
             defaults = self.parse_json_collection_object(object_stub)
-            created = created or self._retrieve_object_from_api(
-                retailer, pk, defaults=defaults)
+            defaults['retailer'] = retailer
+            obj, created_ = self.update_or_create(uid=uid, defaults=defaults)
+            created = created or created_
 
         return created
 
