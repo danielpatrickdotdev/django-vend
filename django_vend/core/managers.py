@@ -110,7 +110,9 @@ class VendAPICollectionManagerMixin(VendAPIManagerMixin):
         return self.parse_collection(retailer, data)
 
     def parse_json_collection_object(self, json_obj):
-        return {}
+        raise NotImplementedError('parse_json_collection_object method must be '
+                                  'implemented by {}'.format(
+                                      self.__class__.__name__))
 
     def parse_collection(self, retailer, result):
         created = False
@@ -131,7 +133,8 @@ class BaseVendAPIManager(AbstractVendAPIManager,
     Simple implementation of a Manager class for a django model that contains
     data retrieved from the Vend API.
     """
-    pass
+    def parse_json_collection_object(self, json_obj):
+        return self.parse_json_object(json_obj)
 
 class BaseVendAPISingleObjectManager(AbstractVendAPISingleObjectManager,
                                      VendAPISingleObjectManagerMixin):
