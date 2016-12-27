@@ -5,12 +5,7 @@ import requests
 from django_vend.core.exceptions import VendSyncError
 
 
-class BaseVendAPIManager(models.Manager):
-
-    resource_collection_url = None
-    resource_object_url = None
-    json_collection_name = None
-    json_object_name = None
+class VendAPIManagerMixin(object):
 
     def value_or_error(self, dict_obj, key, e=KeyError):
         value = dict_obj.get(key)
@@ -47,6 +42,12 @@ class BaseVendAPIManager(models.Manager):
                 raise VendSyncError(e)
         return inner or obj
 
+
+class VendAPISingleObjectManagerMixin(VendAPIManagerMixin):
+
+    resource_object_url = None
+    json_object_name = None
+
     def retrieve_object_from_api(self, retailer, object_id, defaults=None):
         # Call API
         url = self.resource_object_url.format(retailer.name, object_id)
@@ -55,6 +56,16 @@ class BaseVendAPIManager(models.Manager):
         data = self.get_inner_json(data, self.json_object_name)
 
         return self.parse_object(retailer, data, defaults)
+
+    def parse_object(self, retailer, result, defaults=None):
+        raise NotImplementedError('parse_object method must be implemented '
+                                  'by {}'.format(self.__class__.__name__))
+
+
+class VendAPICollectionManagerMixin(VendAPIManagerMixin):
+
+    resource_collection_url = None
+    json_collection_name = None
 
     def retrieve_collection_from_api(self, retailer):
         # Call API
@@ -66,10 +77,19 @@ class BaseVendAPIManager(models.Manager):
         # Save to DB & Return saved objects
         return self.parse_collection(retailer, data)
 
-    def parse_object(self, retailer, result, defaults=None):
-        raise NotImplementedError('parse_object method must be implemented '
+    def parse_collection(self, retailer, result):
+        raise NotImplementedError('parse_collection method must be implemented '
                                   'by {}'.format(self.__class__.__name__))
 
+class BaseVendAPIManager(models.Manager,
+                         VendAPICollectionManagerMixin,
+                         VendAPISingleObjectManagerMixin):
+    """
+    Simple implementation of a Manager class for a django model that contains
+    data retrieved from the Vend API. It may be that due to the inconsistencies
+    of the API, this class is never actually used; Managers may have to
+    implement custom logic for individual objects.
+    """
     def parse_collection(self, retailer, result):
         objects = []
         e = VendSyncError
