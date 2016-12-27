@@ -5,6 +5,13 @@ import requests
 from django_vend.core.exceptions import VendSyncError
 
 
+class AbstractVendAPIManager(models.Manager):
+    def synchronise(self, retailer, object_id=None):
+        if object_id:
+            self.retrieve_object_from_api(retailer, object_id)
+        else:
+            self.retrieve_collection_from_api(retailer)
+
 class VendAPIManagerMixin(object):
 
     def value_or_error(self, dict_obj, key, e=KeyError):
@@ -81,7 +88,7 @@ class VendAPICollectionManagerMixin(VendAPIManagerMixin):
         raise NotImplementedError('parse_collection method must be implemented '
                                   'by {}'.format(self.__class__.__name__))
 
-class BaseVendAPIManager(models.Manager,
+class BaseVendAPIManager(AbstractVendAPIManager,
                          VendAPICollectionManagerMixin,
                          VendAPISingleObjectManagerMixin):
     """

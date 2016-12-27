@@ -4,14 +4,15 @@ from django.utils import timezone
 
 from dateutil.parser import parse as date_parse
 
-from django_vend.core.managers import (VendAPICollectionManagerMixin,
+from django_vend.core.managers import (AbstractVendAPIManager,
+                                       VendAPICollectionManagerMixin,
                                        VendAPISingleObjectManagerMixin)
 from django_vend.core.utils import get_vend_setting
 from django_vend.core.exceptions import VendSyncError
 
 DEFAULT_USER_IMAGE = get_vend_setting('VEND_DEFAULT_USER_IMAGE')
 
-class VendUserManager(models.Manager,
+class VendUserManager(AbstractVendAPIManager,
                       VendAPICollectionManagerMixin,
                       VendAPISingleObjectManagerMixin):
 
