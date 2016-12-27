@@ -132,3 +132,19 @@ class BaseVendAPIManager(AbstractVendAPIManager,
     data retrieved from the Vend API.
     """
     pass
+
+class BaseVendAPISingleObjectManager(AbstractVendAPISingleObjectManager,
+                                     VendAPISingleObjectManagerMixin):
+    """
+    Simple implementation of a Manager class for a django model for which
+    individual instances can be retrieved from the Vend API.
+    """
+    pass
+
+class BaseVendAPICollectionManager(AbstractVendAPICollectionManager,
+                                   VendAPICollectionManagerMixin):
+    """
+    Simple implementation of a Manager class for a django model for which
+    instances can only be retrieved from the Vend API in multiples.
+    """
+    pass
