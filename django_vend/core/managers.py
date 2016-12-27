@@ -68,8 +68,8 @@ class VendAPISingleObjectManagerMixin(VendAPIManagerMixin):
 
         return self.parse_object(retailer, data, defaults)
 
-    def get_object_defaults(self, json_obj):
-        raise NotImplementedError('get_object_defaults method must be '
+    def parse_json_object(self, json_obj):
+        raise NotImplementedError('parse_json_object method must be '
                                   'implemented by {}'.format(
                                       self.__class__.__name__))
 
