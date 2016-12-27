@@ -152,6 +152,7 @@ class VendAuthVendUserListSelect(LoginRequiredMixin, TemplateView):
             vendprofiles=self.request.user.vendprofile)
 
     def get_context_data(self, *args, **kwargs):
+        self.model.objects.synchronise(self.request.user.vendprofile.retailer)
         return {'object_list': self.get_queryset()}
 
     def post(self, request, *args, **kwargs):
