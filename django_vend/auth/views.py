@@ -133,6 +133,7 @@ class VendProfileSelectVendUsers(LoginRequiredMixin, UpdateView):
     success_url = reverse_lazy('vend_profile_select_vend_users')
 
     def get_object(self):
+        VendUser.objects.synchronise(self.request.user.vendprofile.retailer)
         return VendProfile.objects.get(user=self.request.user)
 
     def get_form_kwargs(self):
