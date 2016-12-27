@@ -24,7 +24,7 @@ class VendAPIManagerMixin(object):
 
     sync_exception = VendSyncError
 
-    def value_or_error(self, dict_obj, key, exception=None):
+    def get_dict_value(self, dict_obj, key, exception=None):
         if exception is None:
             exception = self.sync_exception
         value = dict_obj.get(key)
@@ -84,7 +84,7 @@ class VendAPISingleObjectManagerMixin(VendAPIManagerMixin):
                                       self.__class__.__name__))
 
     def parse_object(self, retailer, result, additional_defaults=None):
-        uid = self.value_or_error(result, 'id')
+        uid = self.get_dict_value(result, 'id')
         defaults = self.parse_json_object(result)
         defaults['retailer'] = retailer
 
@@ -116,7 +116,7 @@ class VendAPICollectionManagerMixin(VendAPIManagerMixin):
         created = False
 
         for object_stub in result:
-            uid = self.value_or_error(object_stub, 'id')
+            uid = self.get_dict_value(object_stub, 'id')
             defaults = self.parse_json_collection_object(object_stub)
             defaults['retailer'] = retailer
             obj, created_ = self.update_or_create(uid=uid, defaults=defaults)

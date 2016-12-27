@@ -28,12 +28,12 @@ class VendUserManager(BaseVendAPIManager):
         return initial
 
     def parse_json_object(self, json_obj):
-        uid = self.value_or_error(json_obj, 'id')
-        name = self.value_or_error(json_obj, 'name')
-        display_name = self.value_or_error(json_obj, 'display_name')
-        email = self.value_or_error(json_obj, 'email')
-        created_at = date_parse(self.value_or_error(json_obj, 'created_at'))
-        updated_at = date_parse(self.value_or_error(json_obj, 'updated_at'))
+        uid = self.get_dict_value(json_obj, 'id')
+        name = self.get_dict_value(json_obj, 'name')
+        display_name = self.get_dict_value(json_obj, 'display_name')
+        email = self.get_dict_value(json_obj, 'email')
+        created_at = date_parse(self.get_dict_value(json_obj, 'created_at'))
+        updated_at = date_parse(self.get_dict_value(json_obj, 'updated_at'))
         obj = {
             'name': name,
             'display_name': display_name,
@@ -42,7 +42,7 @@ class VendUserManager(BaseVendAPIManager):
             'updated_at': timezone.make_aware(updated_at, timezone.utc),
         }
         if 'image' in json_obj:
-            image = self.value_or_error(json_obj['image'], 'url')
+            image = self.get_dict_value(json_obj['image'], 'url')
             obj['image'] = image
 
         return obj
@@ -51,7 +51,7 @@ class VendUserManager(BaseVendAPIManager):
         created = False
 
         for object_stub in result:
-            pk = self.value_or_error(object_stub, 'id')
+            pk = self.get_dict_value(object_stub, 'id')
             defaults = self.parse_json_collection_object(object_stub)
             created = created or self._retrieve_object_from_api(
                 retailer, pk, defaults=defaults)
@@ -59,7 +59,7 @@ class VendUserManager(BaseVendAPIManager):
         return created
 
     def parse_json_collection_object(self, json_obj):
-        account_type_str = self.value_or_error(json_obj, 'account_type')
+        account_type_str = self.get_dict_value(json_obj, 'account_type')
         account_type = self.get_account_type(account_type_str)
         return {'account_type': account_type}
 
