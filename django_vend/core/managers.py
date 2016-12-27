@@ -5,6 +5,14 @@ import requests
 from django_vend.core.exceptions import VendSyncError
 
 
+class AbstractVendAPISingleObjectManager(models.Manager):
+    def synchronise(self, retailer, object_id):
+        return self._retrieve_object_from_api(retailer, object_id)
+
+class AbstractVendAPICollectionManager(models.Manager):
+    def synchronise(self, retailer):
+        return self._retrieve_collection_from_api(retailer)
+
 class AbstractVendAPIManager(models.Manager):
     def synchronise(self, retailer, object_id=None):
         if object_id:
