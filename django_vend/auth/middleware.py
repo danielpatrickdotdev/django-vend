@@ -10,11 +10,13 @@ def get_session_venduser(request):
 
     # If venduser is in session, use it
     pk = request.session.get('venduser_id')
-    venduser = VendUser.objects.filter(id=pk).first()
+    venduser = VendUser.objects.filter(pk=pk).first()
 
     # Let's just check we've got a valid venduser for request.user
     if not venduser in request.user.vendprofile.vendusers.all():
         venduser = None
+        if 'venduser_id' in request.session:
+            del request.session['venduser_id']
 
     # If not in session, if authenticated user only has one associated venduser
     # we can just use that
@@ -22,8 +24,8 @@ def get_session_venduser(request):
         vendusers = request.user.vendprofile.vendusers.all()
         if len(vendusers) == 1:
             venduser = vendusers.get()
+            request.session['venduser_id'] = venduser.pk
 
-    print("Venduser:", venduser)
     return venduser
 
 def get_venduser(request):
