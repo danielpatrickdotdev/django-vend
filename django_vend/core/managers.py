@@ -14,10 +14,14 @@ class AbstractVendAPIManager(models.Manager):
 
 class VendAPIManagerMixin(object):
 
-    def value_or_error(self, dict_obj, key, e=KeyError):
+    sync_exception = VendSyncError
+
+    def value_or_error(self, dict_obj, key, exception=None):
+        if exception is None:
+            exception = self.sync_exception
         value = dict_obj.get(key)
         if not value:
-            raise e('dict_obj does not contain key {}'.format(key))
+            raise exception('dict_obj does not contain key {}'.format(key))
 
         return value
 
@@ -30,14 +34,14 @@ class VendAPIManagerMixin(object):
         try:
             result = requests.get(url, headers=headers)
         except requests.exceptions.RequestException as e:
-            raise VendSyncError(e)
+            raise self.sync_exception(e)
         if result.status_code != requests.codes.ok:
-            raise VendSyncError(
+            raise self.sync_exception(
                 'Received {} status from Vend API'.format(result.status_code))
         try:
             data = result.json()
         except ValueError as e:
-            raise VendSyncError(e)
+            raise self.sync_exception(e)
         return data
 
     def get_inner_json(self, obj, container_name):
@@ -46,7 +50,7 @@ class VendAPIManagerMixin(object):
             try:
                 inner = obj[container_name]
             except KeyError as e:
-                raise VendSyncError(e)
+                raise self.sync_exception(e)
         return inner or obj
 
 
@@ -99,10 +103,9 @@ class BaseVendAPIManager(AbstractVendAPIManager,
     """
     def parse_collection(self, retailer, result):
         objects = []
-        e = VendSyncError
 
         for object_stub in result:
-            pk = self.value_or_error(object_stub, 'id', e)
+            pk = self.value_or_error(object_stub, 'id')
             objects.append(self._retrieve_object_from_api(retailer, pk))
 
         return objects

@@ -32,13 +32,12 @@ class VendUserManager(AbstractVendAPIManager,
         return initial
 
     def parse_object(self, retailer, result, override_defaults):
-        e = VendSyncError
-        uid = self.value_or_error(result, 'id', e)
-        name = self.value_or_error(result, 'name', e)
-        display_name = self.value_or_error(result, 'display_name', e)
-        email = self.value_or_error(result, 'email', e)
-        created_at = date_parse(self.value_or_error(result, 'created_at', e))
-        updated_at = date_parse(self.value_or_error(result, 'updated_at', e))
+        uid = self.value_or_error(result, 'id')
+        name = self.value_or_error(result, 'name')
+        display_name = self.value_or_error(result, 'display_name')
+        email = self.value_or_error(result, 'email')
+        created_at = date_parse(self.value_or_error(result, 'created_at'))
+        updated_at = date_parse(self.value_or_error(result, 'updated_at'))
         defaults = {
             'retailer': retailer,
             'name': name,
@@ -48,7 +47,7 @@ class VendUserManager(AbstractVendAPIManager,
             'updated_at': timezone.make_aware(updated_at, timezone.utc),
         }
         if 'image' in result:
-            image = self.value_or_error(result['image'], 'url', e)
+            image = self.value_or_error(result['image'], 'url')
             defaults['image'] = image
 
         for key in override_defaults:
@@ -59,11 +58,10 @@ class VendUserManager(AbstractVendAPIManager,
 
     def parse_collection(self, retailer, result):
         users = []
-        e = VendSyncError
 
         for user in result:
-            pk = self.value_or_error(user, 'id', e)
-            account_type_str = self.value_or_error(user, 'account_type', e)
+            pk = self.value_or_error(user, 'id')
+            account_type_str = self.value_or_error(user, 'account_type')
             account_type = self.get_account_type(account_type_str)
             users.append(self.retrieve_object_from_api(
                 retailer, pk, defaults={'account_type': account_type}))
