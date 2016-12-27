@@ -120,7 +120,7 @@ class VendAuthComplete(LoginRequiredMixin, RedirectView, OAuth2Mixin):
             user=self.request.user,
             defaults={'retailer':retailer},
         )
-        self.request.session['retailer_id'] = retailer.id
+        self.request.session['retailer_id'] = retailer.pk
 
         return self.request.build_absolute_uri(
             reverse('vend_profile_select_vend_users'))
@@ -164,7 +164,7 @@ class VendAuthVendUserListSelect(LoginRequiredMixin, TemplateView):
         except self.model.DoesNotExist:
             raise Http404(
                 'VendUser id {} not found for logged in User'.format(
-                    self.object.id))
+                    self.object.pk))
 
         request.session['venduser_id'] = pk
         return HttpResponseRedirect(reverse('vend_auth_select_vend_user'))

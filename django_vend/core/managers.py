@@ -95,7 +95,7 @@ class BaseVendAPIManager(models.Manager,
         e = VendSyncError
 
         for object_stub in result:
-            id = self.value_or_error(object_stub, 'id', e)
-            objects.append(self.retrieve_object_from_api(retailer, id))
+            pk = self.value_or_error(object_stub, 'id', e)
+            objects.append(self.retrieve_object_from_api(retailer, pk))
 
         return objects

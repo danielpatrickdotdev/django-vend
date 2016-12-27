@@ -61,11 +61,11 @@ class VendUserManager(models.Manager,
         e = VendSyncError
 
         for user in result:
-            id = self.value_or_error(user, 'id', e)
+            pk = self.value_or_error(user, 'id', e)
             account_type_str = self.value_or_error(user, 'account_type', e)
             account_type = self.get_account_type(account_type_str)
             users.append(self.retrieve_object_from_api(
-                retailer, id, defaults={'account_type': account_type}))
+                retailer, pk, defaults={'account_type': account_type}))
 
         return users
 

@@ -13,4 +13,4 @@ class VendProfileSelectVendUsersForm(forms.ModelForm):
         super(VendProfileSelectVendUsersForm, self).__init__(*args, **kwargs)
         
         self.fields['vendusers'].queryset = VendUser.objects.filter(
-            retailer__id=retailer_id)
+            retailer__pk=retailer_id)
