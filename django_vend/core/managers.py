@@ -26,6 +26,8 @@ class VendAPIManagerMixin(object):
         return value
 
     def _retrieve_from_api(self, retailer, url):
+        exception = self.sync_exception
+
         headers = {
             'Authorization': 'Bearer {}'.format(retailer.access_token),
             'Content-Type': 'application/json',
@@ -34,14 +36,14 @@ class VendAPIManagerMixin(object):
         try:
             result = requests.get(url, headers=headers)
         except requests.exceptions.RequestException as e:
-            raise self.sync_exception(e)
+            raise exception(e)
         if result.status_code != requests.codes.ok:
-            raise self.sync_exception(
+            raise exception(
                 'Received {} status from Vend API'.format(result.status_code))
         try:
             data = result.json()
         except ValueError as e:
-            raise self.sync_exception(e)
+            raise exception(e)
         return data
 
     def get_inner_json(self, obj, container_name):
