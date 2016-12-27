@@ -123,7 +123,7 @@ class VendAuthComplete(LoginRequiredMixin, RedirectView, OAuth2Mixin):
         self.request.session['retailer_id'] = retailer.id
 
         return self.request.build_absolute_uri(
-            reverse('vend_auth_select_user'))
+            reverse('vend_profile_select_vend_users'))
 
 
 class VendProfileSelectVendUsers(LoginRequiredMixin, UpdateView):
