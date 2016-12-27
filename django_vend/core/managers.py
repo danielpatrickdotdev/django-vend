@@ -68,10 +68,21 @@ class VendAPISingleObjectManagerMixin(VendAPIManagerMixin):
 
         return self.parse_object(retailer, data, defaults)
 
-    def parse_object(self, retailer, result, defaults=None):
-        raise NotImplementedError('parse_object method must be implemented '
-                                  'by {}'.format(self.__class__.__name__))
+    def get_object_defaults(self, json_obj):
+        raise NotImplementedError('get_object_defaults method must be '
+                                  'implemented by {}'.format(
+                                      self.__class__.__name__))
 
+    def parse_object(self, retailer, result, additional_defaults=None):
+        uid = self.value_or_error(result, 'id')
+        defaults = self.parse_json_object(result)
+        defaults['retailer'] = retailer
+
+        for key in additional_defaults:
+            defaults[key] = additional_defaults[key]
+
+        obj, created = self.update_or_create(uid=uid, defaults=defaults)
+        return created
 
 class VendAPICollectionManagerMixin(VendAPIManagerMixin):
 
@@ -88,24 +99,25 @@ class VendAPICollectionManagerMixin(VendAPIManagerMixin):
         # Save to DB & Return saved objects
         return self.parse_collection(retailer, data)
 
+    def parse_json_collection_object(self, json_obj):
+        return {}
+
     def parse_collection(self, retailer, result):
-        raise NotImplementedError('parse_collection method must be implemented '
-                                  'by {}'.format(self.__class__.__name__))
+        objects = []
+
+        for object_stub in result:
+            pk = self.value_or_error(object_stub, 'id')
+            defaults = self.parse_json_collection_object(object_stub)
+            objects.append(self._retrieve_object_from_api(
+                retailer, pk, defaults=defaults))
+
+        return objects
 
 class BaseVendAPIManager(AbstractVendAPIManager,
                          VendAPICollectionManagerMixin,
                          VendAPISingleObjectManagerMixin):
     """
     Simple implementation of a Manager class for a django model that contains
-    data retrieved from the Vend API. It may be that due to the inconsistencies
-    of the API, this class is never actually used; Managers may have to
-    implement custom logic for individual objects.
+    data retrieved from the Vend API.
     """
-    def parse_collection(self, retailer, result):
-        objects = []
-
-        for object_stub in result:
-            pk = self.value_or_error(object_stub, 'id')
-            objects.append(self._retrieve_object_from_api(retailer, pk))
-
-        return objects
+    pass

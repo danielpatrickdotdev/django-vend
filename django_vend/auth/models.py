@@ -31,42 +31,30 @@ class VendUserManager(AbstractVendAPIManager,
             raise exception(e)
         return initial
 
-    def parse_object(self, retailer, result, override_defaults):
-        uid = self.value_or_error(result, 'id')
-        name = self.value_or_error(result, 'name')
-        display_name = self.value_or_error(result, 'display_name')
-        email = self.value_or_error(result, 'email')
-        created_at = date_parse(self.value_or_error(result, 'created_at'))
-        updated_at = date_parse(self.value_or_error(result, 'updated_at'))
-        defaults = {
-            'retailer': retailer,
+    def parse_json_object(self, json_obj):
+        uid = self.value_or_error(json_obj, 'id')
+        name = self.value_or_error(json_obj, 'name')
+        display_name = self.value_or_error(json_obj, 'display_name')
+        email = self.value_or_error(json_obj, 'email')
+        created_at = date_parse(self.value_or_error(json_obj, 'created_at'))
+        updated_at = date_parse(self.value_or_error(json_obj, 'updated_at'))
+        obj = {
             'name': name,
             'display_name': display_name,
             'email': email,
             'created_at': timezone.make_aware(created_at, timezone.utc),
             'updated_at': timezone.make_aware(updated_at, timezone.utc),
         }
-        if 'image' in result:
-            image = self.value_or_error(result['image'], 'url')
-            defaults['image'] = image
+        if 'image' in json_obj:
+            image = self.value_or_error(json_obj['image'], 'url')
+            obj['image'] = image
 
-        for key in override_defaults:
-            defaults[key] = override_defaults[key]
+        return obj
 
-        user, created = self.update_or_create(uid=uid, defaults=defaults)
-        return user
-
-    def parse_collection(self, retailer, result):
-        users = []
-
-        for user in result:
-            pk = self.value_or_error(user, 'id')
-            account_type_str = self.value_or_error(user, 'account_type')
-            account_type = self.get_account_type(account_type_str)
-            users.append(self.retrieve_object_from_api(
-                retailer, pk, defaults={'account_type': account_type}))
-
-        return users
+    def parse_json_collection_object(self, json_obj):
+        account_type_str = self.value_or_error(json_obj, 'account_type')
+        account_type = self.get_account_type(account_type_str)
+        return {'account_type': account_type}
 
 
 class VendRetailer(models.Model):
