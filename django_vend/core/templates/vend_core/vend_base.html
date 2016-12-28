@@ -1,0 +1,12 @@
+<!DOCTYPE html>{% load staticfiles %}
+<html>
+    <head>
+        <title>{% block title%}{% endblock %} | Django Vend</title>{% block head_extra %}{% endblock %}
+    </head>
+    <body>{% if venduser %}
+        <div>
+            <p>Current user:</p>
+            <img src="{{ venduser.image }}">
+            <p>{{ venduser.display_name }}</p>
+        </div>{% endif %}{% block body %}{% endblock%}    </body>
+</html>
