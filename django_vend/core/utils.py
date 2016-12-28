@@ -2,6 +2,9 @@ import dateutil.parser
 
 from django.conf import settings
 
+
+UUID_REGEX = '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}'
+
 vend_settings = {
     'VEND_DEFAULT_USER_IMAGE': ('https://secure.vendhq.com/images/placeholder'
                                 '/customer/no-image-white-standard.png'),
