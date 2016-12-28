@@ -24,12 +24,13 @@ class VendAPIManagerMixin(object):
 
     sync_exception = VendSyncError
 
-    def get_dict_value(self, dict_obj, key, exception=None):
+    def get_dict_value(self, dict_obj, key, exception=None, required=True):
         if exception is None:
             exception = self.sync_exception
         value = dict_obj.get(key)
-        if not value:
+        if not value and required:
             raise exception('dict_obj does not contain key {}'.format(key))
+
 
         return value
 
