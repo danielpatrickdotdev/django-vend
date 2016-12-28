@@ -2,10 +2,8 @@ from django.db import models
 from django.conf import settings
 from django.utils import timezone
 
-from dateutil.parser import parse as date_parse
-
 from django_vend.core.managers import BaseVendAPIManager
-from django_vend.core.utils import get_vend_setting
+from django_vend.core.utils import get_vend_setting, parse_date
 from django_vend.core.exceptions import VendSyncError
 
 DEFAULT_USER_IMAGE = get_vend_setting('VEND_DEFAULT_USER_IMAGE')
@@ -32,8 +30,8 @@ class VendUserManager(BaseVendAPIManager):
         name = self.get_dict_value(json_obj, 'name')
         display_name = self.get_dict_value(json_obj, 'display_name')
         email = self.get_dict_value(json_obj, 'email')
-        created_at = date_parse(self.get_dict_value(json_obj, 'created_at'))
-        updated_at = date_parse(self.get_dict_value(json_obj, 'updated_at'))
+        created_at = parse_date(self.get_dict_value(json_obj, 'created_at'))
+        updated_at = parse_date(self.get_dict_value(json_obj, 'updated_at'))
         obj = {
             'name': name,
             'display_name': display_name,
