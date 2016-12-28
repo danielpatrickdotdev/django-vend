@@ -3,10 +3,12 @@
 {% block body %}{% if object_list %}
         <div>{% for register in object_list %}
             <div>
-                <p>
-                    <strong>{{ register.name }}</strong>
-                    Status: {% if register.is_open %}Open{% else %}Closed{% endif %}
-                </p>
+                <a href="{{ register.get_absolute_url }}">
+                    <p>
+                        <strong>{{ register.name }}</strong>
+                        Status: {% if register.is_open %}Open{% else %}Closed{% endif %}
+                    </p>
+                </a>
             </div>{% endfor %}
         </div>{% endif %}
 {% endblock %}

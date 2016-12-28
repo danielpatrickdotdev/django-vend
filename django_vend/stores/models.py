@@ -124,5 +124,8 @@ class VendRegister(models.Model):
 
     objects = VendRegisterManager()
 
+    def get_absolute_url(self):
+        return reverse('vend_register_detail', args=[str(self.uid)])
+
     def __str__(self):
         return self.name
