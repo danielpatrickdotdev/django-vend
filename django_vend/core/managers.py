@@ -89,8 +89,9 @@ class VendAPISingleObjectManagerMixin(VendAPIManagerMixin):
         defaults = self.parse_json_object(result)
         defaults['retailer'] = retailer
 
-        for key in additional_defaults:
-            defaults[key] = additional_defaults[key]
+        if additional_defaults:
+            for key in additional_defaults:
+                defaults[key] = additional_defaults[key]
 
         obj, created = self.update_or_create(uid=uid, defaults=defaults)
         return created
