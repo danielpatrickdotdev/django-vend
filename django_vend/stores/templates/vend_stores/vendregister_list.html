@@ -1,0 +1,12 @@
+{% extends "vend_stores/vendregister_base.html" %}
+{% block title %}Vend Stores{% endblock %}
+{% block body %}{% if object_list %}
+        <div>{% for register in object_list %}
+            <div>
+                <p>
+                    <strong>{{ register.name }}</strong>
+                    Status: {% if register.is_open %}Open{% else %}Closed{% endif %}
+                </p>
+            </div>{% endfor %}
+        </div>{% endif %}
+{% endblock %}

@@ -1,0 +1,11 @@
+{% extends "vend_stores/vendoutlet_base.html" %}
+{% block title %}Vend Stores{% endblock %}
+{% block body %}{% if object_list %}
+        <div>{% for outlet in object_list %}
+            <div>
+                <p>
+                    <strong>{{ outlet.name }}</strong>
+                </p>
+            </div>{% endfor %}
+        </div>{% endif %}
+{% endblock %}
