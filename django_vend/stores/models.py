@@ -1,5 +1,6 @@
 from django.db import models
 from django.utils import timezone
+from django.urls import reverse
 
 from django_vend.core.managers import BaseVendAPIManager
 from django_vend.core.exceptions import VendSyncError
@@ -93,6 +94,9 @@ class VendOutlet(models.Model):
     deleted_at = models.DateTimeField(null=True)
 
     objects = VendOutletManager()
+
+    def get_absolute_url(self):
+        return reverse('vend_outlet_detail', args=[str(self.uid)])
 
     def __str__(self):
         return self.name
