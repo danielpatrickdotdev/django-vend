@@ -4,7 +4,7 @@
         <div>{% for outlet in object_list %}
             <div>
                 <p>
-                    <strong>{{ outlet.name }}</strong>
+                <a href="{{ outlet.get_absolute_url }}"><strong>{{ outlet.name }}</strong></a>
                 </p>
             </div>{% endfor %}
         </div>{% endif %}
