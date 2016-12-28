@@ -8,10 +8,14 @@ class VendAuthMixin(LoginRequiredMixin):
 
 
 class VendAuthSingleObjectSyncMixin(VendAuthMixin):
+
+    slug_field = 'uid'
+    slug_url_kwarg = 'uid'
+
     def get_object(self):
         retailer = self.request.user.vendprofile.retailer
-        pk = self.kwargs.get(self.pk_url_kwarg)
-        self.model.objects.synchronise(retailer, pk)
+        uid = self.kwargs.get('uid')
+        self.model.objects.synchronise(retailer, uid)
         return super(VendAuthSingleObjectSyncMixin, self).get_object()
 
 
