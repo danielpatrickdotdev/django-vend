@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils import timezone
 
 import requests
 
@@ -93,6 +94,8 @@ class VendAPISingleObjectManagerMixin(VendAPIManagerMixin):
             for key in additional_defaults:
                 defaults[key] = additional_defaults[key]
 
+        defaults['retrieved'] = timezone.now()
+
         obj, created = self.update_or_create(uid=uid, defaults=defaults)
         return created
 
@@ -121,8 +124,11 @@ class VendAPICollectionManagerMixin(VendAPIManagerMixin):
 
         for object_stub in result:
             uid = self.get_dict_value(object_stub, 'id')
+
             defaults = self.parse_json_collection_object(object_stub)
             defaults['retailer'] = retailer
+            defaults['retrieved'] = timezone.now()
+
             obj, created_ = self.update_or_create(uid=uid, defaults=defaults)
             created = created or created_
 

@@ -93,6 +93,9 @@ class VendOutlet(models.Model):
     display_prices_tax_inclusive = models.BooleanField(default=True)
     deleted_at = models.DateTimeField(null=True)
 
+    # time retrieved from Vend API
+    retrieved = models.DateTimeField()
+
     objects = VendOutletManager()
 
     def get_absolute_url(self):
@@ -121,6 +124,9 @@ class VendRegister(models.Model):
     # Non-API
     retailer = models.ForeignKey(VendRetailer, editable=False,
         on_delete=models.CASCADE)
+
+    # time retrieved from Vend API
+    retrieved = models.DateTimeField()
 
     objects = VendRegisterManager()
 

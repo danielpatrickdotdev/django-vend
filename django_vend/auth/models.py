@@ -109,6 +109,9 @@ class VendUser(models.Model):
     created_at = models.DateTimeField()
     updated_at = models.DateTimeField()
 
+    # time retrieved from Vend API
+    retrieved = models.DateTimeField()
+
     objects = VendUserManager()
 
     def __str__(self):
