@@ -72,7 +72,7 @@ class VendRegisterManager(BaseVendAPIManager):
 
 class VendOutlet(models.Model):
     # /api/outlets AND /api/2.0/outlets
-    uid = models.UUIDField()
+    uid = models.UUIDField(unique=True)
     name = models.CharField(max_length=256)
     # /api/outlets
     #email = models.EmailField()
