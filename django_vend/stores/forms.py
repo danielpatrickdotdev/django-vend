@@ -25,6 +25,14 @@ class VendOutletForm(forms.ModelForm):
             if deleted_at is not None and deleted_at == 'null':
                 data['deleted_at'] = None
 
+            if 'instance' not in kwargs or kwargs['instance'] is None:
+                # Note: currently assumes instance is always passed as a kwarg
+                # - need to check but this is probably bad
+                try:
+                    kwargs['instance'] = VendOutlet.objects.get(uid=uid)
+                except VendOutlet.DoesNotExist:
+                    pass
+
         super(VendOutletForm, self).__init__(data, *args, **kwargs)
 
     class Meta:
