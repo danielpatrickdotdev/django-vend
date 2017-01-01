@@ -106,10 +106,9 @@ class VendOutlet(models.Model):
 
 class VendRegister(models.Model):
     # /api/registers AND /api/2.0/registers
-    uid = models.UUIDField(editable=False)
+    uid = models.UUIDField(unique=True)
     name = models.CharField(max_length=256)
-    outlet = models.ForeignKey(VendOutlet, editable=False,
-        on_delete=models.CASCADE)
+    outlet = models.ForeignKey(VendOutlet, on_delete=models.CASCADE)
     invoice_prefix = models.CharField(max_length=32)
     invoice_suffix = models.CharField(max_length=32)
     invoice_sequence = models.PositiveIntegerField()
