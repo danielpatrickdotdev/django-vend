@@ -18,4 +18,6 @@ class VendDateTimeField(forms.DateTimeField):
                 value = parse_datetime(value)
             except ValueError:
                 pass
+        elif value == "null":
+            value = None
         return super(VendDateTimeField, self).to_python(value)
